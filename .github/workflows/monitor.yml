@@ -2,8 +2,8 @@ name: Housing Monitor
 
 on:
   schedule:
-    # Runs every 20 minutes (balanced to avoid blocking)
-    - cron: '*/20 * * * *'
+    # Runs every 5 minutes (balanced to avoid blocking)
+    - cron: '*/5 * * * *'
   workflow_dispatch:
     # Allows you to click "Run workflow" manually for testing
 

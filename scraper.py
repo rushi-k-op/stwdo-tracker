@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 # --- CONFIGURATION ---
 URL = "https://www.stwdo.de/en/living-houses-application/current-housing-offers"
-TARGET_TEXT = "Pizza Party at the Dorm"
+TARGET_TEXT = "No results found for the given search criteria."
 
 # We fetch the secret topic from the environment.
 # This keeps your personal notification channel private, even if the code is public.
