@@ -1,0 +1,30 @@
+name: Housing Monitor
+
+on:
+  schedule:
+    # Runs every 20 minutes (balanced to avoid blocking)
+    - cron: '*/20 * * * *'
+  workflow_dispatch:
+    # Allows you to click "Run workflow" manually for testing
+
+jobs:
+  check-housing:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Libraries
+        run: pip install requests beautifulsoup4
+
+      - name: Run Scraper
+        env:
+          # This pulls the secret from your GitHub Repository Settings
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python scraper.py
