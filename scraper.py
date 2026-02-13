@@ -1,64 +1,55 @@
 import requests
 import os
 import sys
-from bs4 import BeautifulSoup
 
 # --- CONFIGURATION ---
-URL = "https://www.stwdo.de/en/living-houses-application/current-housing-offers"
-TARGET_TEXT = "No results found for the given search criteria."
+# PASTE YOUR GIST RAW URL HERE!
+URL = "https://gist.githubusercontent.com/rushi-k-op/0b9cda9f72887ad6431a3bb714d40ce0/raw/05718923d17c761d0082e85f3d0d7bf125e6b1ad/status.txt" 
 
-# We fetch the secret topic from the environment.
-# This keeps your personal notification channel private, even if the code is public.
+# The "Safety Phrase". If this exists, we assume NO apartments.
+TARGET_TEXT = "No results found for the given search criteria"
+
+# Get the secret topic from GitHub Settings
 NTFY_TOPIC = os.environ.get("NTFY_TOPIC")
 
 def send_notification():
-    """Sends a push notification to your phone via ntfy.sh"""
     if not NTFY_TOPIC:
-        print("Error: NTFY_TOPIC is missing. Notification skipped.")
+        print("❌ ERROR: NTFY_TOPIC is missing from Settings!")
         return
 
+    print(f"🔔 Sending notification to: https://ntfy.sh/{NTFY_TOPIC}")
     try:
         requests.post(
             f"https://ntfy.sh/{NTFY_TOPIC}",
-            data="New content detected on STWDO housing page! Check immediately.",
+            data="TEST SUCCESSFUL! The website changed!",
             headers={
-                "Title": "🏠 STWDO Housing Alert",
+                "Title": "✅ System Works!",
                 "Priority": "high",
-                "Tags": "house,rotating_light",
-                "Click": URL
+                "Tags": "tada,check_mark"
             },
             timeout=10
         )
-        print(f"Notification sent successfully to topic ending in ...{NTFY_TOPIC[-4:]}")
+        print("✅ Notification sent! Check your phone.")
     except Exception as e:
-        print(f"Failed to send notification: {e}")
+        print(f"❌ Failed to send notification: {e}")
 
 def check_website():
-    """Checks if the 'No results' text is missing from the page."""
-    print(f"Checking {URL}...")
+    print(f"🔎 Checking URL: {URL}")
     
-    # We use a standard browser User-Agent to avoid being blocked.
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    }
-
     try:
-        response = requests.get(URL, headers=headers, timeout=20)
-        response.raise_for_status()
+        response = requests.get(URL, timeout=10)
+        page_content = response.text
         
-        soup = BeautifulSoup(response.text, 'html.parser')
-        page_text = soup.get_text()
+        print(f"📄 Page Content Found: '{page_content.strip()}'")
 
-        # LOGIC: If the "No results" text is NOT found, it means there are listings.
-        if TARGET_TEXT not in page_text:
-            print("🚨 CHANGE DETECTED: The 'No results' text is gone!")
-            send_notification()
+        if TARGET_TEXT in page_content:
+            print(f"✅ Safe: Found the text '{TARGET_TEXT}'. No notification needed.")
         else:
-            print("✅ No change: 'No results' text is still there.")
+            print(f"🚨 ALERT: '{TARGET_TEXT}' is MISSING! Sending alert...")
+            send_notification()
 
     except Exception as e:
-        print(f"❌ Error checking website: {e}")
-        # We exit with code 1 so GitHub Actions knows the script failed
+        print(f"❌ Crash: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
