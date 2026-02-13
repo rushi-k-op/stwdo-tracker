@@ -9,22 +9,18 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Run quick check
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scraper
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-        run: |
-          # One-liner install + run
-          pip install requests && python -c "
-import requests, os
-url = 'https://www.stwdo.de/en/living-houses-application/current-housing-offers'
-topic = os.environ.get('NTFY_TOPIC')
-try:
-    r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10)
-    if 'No results found for the given search criteria'.lower() not in r.text.lower():
-        requests.post(f'https://ntfy.sh/{topic}', data='🏠 New apartment!', 
-                     headers={'Title': 'Alert'}, timeout=3)
-        print('✓ Alert sent')
-    else:
-        print('✓ No change')
-except: print('✗ Error')
-          "
+        run: python scraper.py
