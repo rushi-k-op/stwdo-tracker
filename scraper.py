@@ -45,10 +45,10 @@ def check():
 
     except requests.exceptions.HTTPError as e:
         print(f"✗ HTTP Error: {e}")
-    except requests.exceptions.ConnectionError:
-        print(f"✗ Connection failed - {datetime.now().isoformat()}")
-    except requests.exceptions.Timeout:
-        print(f"✗ Request timed out - {datetime.now().isoformat()}")
+    except requests.exceptions.ConnectionError as e:
+        print(f"✗ Connection failed: {e}")
+    except requests.exceptions.Timeout as e:
+        print(f"✗ Request timed out: {e}")
     except Exception as e:
         print(f"✗ Unexpected error: {e}")
 
