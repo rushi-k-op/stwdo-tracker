@@ -1,59 +1,48 @@
 import requests
 import os
 import sys
+from datetime import datetime
 
-# --- CONFIGURATION ---
-# Currently set to your TEST GIST. 
-# When you are done testing, replace this with the real STWDO URL.
-URL = "https://gist.githubusercontent.com/rushi-k-op/0b9cda9f72887ad6431a3bb714d40ce0/raw/1e9fd12c12753d5f8cdb4133c8206ed0c007f5ba/status.txt"
-
-# The text we expect to see if there are NO apartments.
+# --- CONFIG ---
+URL = "https://www.stwdo.de/en/living-houses-application/current-housing-offers"
 TARGET_TEXT = "No results found for the given search criteria"
-
-# Get the secret topic from GitHub Settings
 NTFY_TOPIC = os.environ.get("NTFY_TOPIC")
 
 def send_notification():
+    """Simple notification - no extra imports needed"""
     if not NTFY_TOPIC:
-        print("Error: NTFY_TOPIC is missing from Settings.")
         return
-
-    print(f"Sending notification to ntfy.sh/{NTFY_TOPIC}...")
-    try:
-        requests.post(
-            f"https://ntfy.sh/{NTFY_TOPIC}",
-            data="Test successful. The website content has changed.",
-            headers={
-                "Title": "System Check OK",
-                "Priority": "high",
-                "Tags": "warning"
-            },
-            timeout=10
-        )
-        print("Notification sent successfully.")
-    except Exception as e:
-        print(f"Failed to send notification: {e}")
-
-def check_website():
-    print(f"Checking URL: {URL}")
     
     try:
-        response = requests.get(URL, timeout=10)
-        # Fix encoding issues by forcing UTF-8
-        response.encoding = 'utf-8' 
-        page_content = response.text
+        # Ultra simple POST request
+        requests.post(
+            f"https://ntfy.sh/{NTFY_TOPIC}",
+            data=" NEW APARTMENT! Check STWDO now!",
+            headers={"Title": "Housing Alert", "Tags": "house"},
+            timeout=5  # Short timeout to save time
+        )
+    except:
+        pass  # Fail silently, no need to log
+
+def check():
+    """Single function, minimal operations"""
+    try:
+        # Minimal headers
+        response = requests.get(
+            URL, 
+            headers={'User-Agent': 'Mozilla/5.0'}, 
+            timeout=10
+        )
         
-        print(f"Page content found: '{page_content.strip()}'")
-
-        if TARGET_TEXT in page_content:
-            print(f"Status: No change. Found '{TARGET_TEXT}'.")
-        else:
-            print(f"Status: Change detected. '{TARGET_TEXT}' is missing.")
+        # Quick check (case-insensitive)
+        if TARGET_TEXT.lower() not in response.text.lower():
             send_notification()
-
+            print(f" ALERT SENT - {datetime.now().isoformat()}")
+        else:
+            print(f" No change - {datetime.now().isoformat()}")
+            
     except Exception as e:
-        print(f"Critical Error: {e}")
-        sys.exit(1)
+        print(f" Error: {e}")
 
 if __name__ == "__main__":
-    check_website()
+    check()
