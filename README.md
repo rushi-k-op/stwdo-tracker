@@ -8,6 +8,8 @@ Finding an apartment in Germany as an international student is tough. When I dis
 
 This project was originally built to monitor the [Studierendenwerk Dortmund (STWDO)](https://www.stwdo.de/en/living-houses-application/current-housing-offers) housing portal, but it can be adapted to monitor any website where you need to detect when new content appears.
 
+DISCLAMER - This tool is for educational purposes and personal use only. Please respect the website's robots.txt and Terms of Service. The author is not responsible for any misuse.
+
 ## How It Works
 
 1. A GitHub Actions workflow runs every 5 minutes (configurable via cron).
